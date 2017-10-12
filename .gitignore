@@ -1,0 +1,17 @@
+.DS_Store
+coverage/
+TODO.md
+heimdall_store/
+.modulusAuth
+productionconfig.json
+node_modules
+npm-debug.log
+.modulus
+dist/
+newrelic_agent.log
+
+# IDE - related
+*.iml
+.idea
+*.sublime-project
+*.sublime-workspace
