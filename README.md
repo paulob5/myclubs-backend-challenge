@@ -2,7 +2,7 @@
 
 After users participate in a workout, we ask them to provide feedback on how they liked or disliked their workout. This lets us gather valuable data about our partner network and about the things people enjoy.
 
-You get asked to provide a way for operations team to get the average rating a user has provided to see if they are generally happy with our product or if we should reach out to them to see how we can improve things. Christoph and Lukas tell you that they had to implement the feedback service in a hurry a few months ago and sloppily did so, so there might be a few rough patches in there which you could fix on the way.
+You get asked to provide a way for the operations team to get the average rating a user has provided to see if they are generally happy with our product or if we should reach out to them to see how we can improve things. Christoph and Lukas tell you that they had to implement the feedback service in a hurry a few months ago and sloppily did so, so there might be a few rough patches in there which you could fix on the way.
 
 From this briefing you gather that your goal should look roughly as follows:
 
