@@ -23,3 +23,7 @@ From this briefing you gather that your goal should look roughly as follows:
 ## Getting Started
 
 You can install the project dependencies with `npm install`, run the tests with `npm run test` and run the server with `npm run dev`.
+
+## Deliverable
+
+Fork this repository and submit you results as pull request. 
