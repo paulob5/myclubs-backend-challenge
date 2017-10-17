@@ -15,7 +15,15 @@ const ERRORS = {
     message: "feedback has already been provided"
   },
   VALUE_REQUIRED: { code: 25004, message: "value is required" },
-  BOOKING_NOT_FOUND: { code: 25005, message: "booking  not found" }
+  BOOKING_NOT_FOUND: { code: 25005, message: "booking  not found" },
+  NO_FEEDBACKS_PROVIDED_YET: {
+    code: 25006,
+    message: "user has no feedbacks yet"
+  },
+  NO_FEEDBACKS_WITH_VALUES: {
+    code: 25007,
+    message: "user did not provide feedback values yet"
+  }
 };
 
 class FeedbackService {
@@ -31,6 +39,9 @@ class FeedbackService {
   };
   getRequired = async options => {
     return getRequired(this.dataStore, options);
+  };
+  getAverageUserRating = async options => {
+    return getAverageUserRating(this.dataStore, options);
   };
 }
 
@@ -133,6 +144,9 @@ const create = async (
   dataStore,
   { user, bookingId, terms, source, comment, value }
 ) => {
+  if (!user) {
+    throw new ApiError(ERRORS.USER_REQUIRED);
+  }
   if (!bookingId) {
     throw new ApiError(ERRORS.BOOKING_REQUIRED);
   }
@@ -182,14 +196,14 @@ const create = async (
 };
 
 /*
-    TODO: refactor to use datastore.getOne with the activity include
+    Refactored to use datastore.getOne with the activity include
 */
 const getBooking = async (dataStore, bookingId) => {
-  const { results } = await dataStore.query(
-    { type: "Booking", include: "activity" },
-    { objectId: bookingId }
-  );
-  return results[0];
+  const result = await dataStore.getOne("Booking", {
+    objectId: bookingId,
+    include: "activity"
+  });
+  return result;
 };
 
 /*
@@ -214,8 +228,46 @@ const save = async (dataStore, feedback) => {
   return feedback;
 };
 
-const getAvargeUserRating = (dataStore, userId) => {
-  // TODO: implement me
+const getAverageUserRating = async (dataStore, userID) => {
+  const userPtr = {
+    __type: "Pointer",
+    className: "_User",
+    objectId: userID.objectId
+  };
+
+  let user = await dataStore.getOne("_User", userID.user.objectId);
+
+  const { results } = await dataStore.query(
+    { type: CLASS_NAME, include: "user" },
+    { user: user }
+  );
+
+  if (!results || results.length == 0) {
+    throw new ApiError(ERRORS.NO_FEEDBACKS_PROVIDED_YET);
+  }
+
+  let totalValues = 0;
+  let feedbacksWithValues = 0;
+  results.forEach(feedback => {
+    if (feedback.value) {
+      console.log("Found feedback value:", feedback.value);
+      feedbacksWithValues++;
+      totalValues += feedback.value;
+    }
+  });
+
+  if (feedbacksWithValues === 0) {
+    throw new ApiError(ERRORS.NO_FEEDBACKS_WITH_VALUES);
+  }
+  let average = totalValues / feedbacksWithValues;
+  console.log("TOTAL =", totalValues);
+  console.log("Average = ", average);
+
+  return {
+    user: userID.user.objectId,
+    totalFeedbacks: feedbacksWithValues,
+    average
+  };
 };
 
 module.exports = {

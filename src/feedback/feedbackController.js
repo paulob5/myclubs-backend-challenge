@@ -7,7 +7,8 @@ class FeedbackController {
     this.router = express.Router();
 
     this.router.post("/", this.submit);
-    this.router.get("/terms", this.getTerms);
+    this.router.get("/terms/:bookingId", this.getTerms);
+    this.router.get("/users/:userId", this.getAverageUserRating);
     this.router.get("/", this.getRequired);
   }
   submit = async (req, res, next) => {
@@ -29,8 +30,12 @@ class FeedbackController {
   getRequired = async (req, res, next) => {
     try {
       const data = {
-        user: req.user,
-        bookingId: req.params.bookingId
+        //user: req.user,
+        user: {
+          objectId: "userID",
+          __type: "Pointer",
+          className: "_User"
+        }
       };
       const json = await this.feedback.getRequired(data);
       res.json(json);
@@ -41,10 +46,32 @@ class FeedbackController {
   getTerms = async (req, res, next) => {
     try {
       const data = {
-        user: req.user,
+        //user: req.user,
+        user: {
+          objectId: "userID",
+          __type: "Pointer",
+          className: "_User"
+        },
         bookingId: req.params.bookingId
       };
       const json = await this.feedback.getTerms(data);
+      res.json(json);
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  getAverageUserRating = async (req, res, next) => {
+    try {
+      const data = {
+        //user: req.user,
+        user: {
+          objectId: "userID",
+          __type: "Pointer",
+          className: "_User"
+        }
+      };
+      const json = await this.feedback.getAverageUserRating(data);
       res.json(json);
     } catch (e) {
       next(e);

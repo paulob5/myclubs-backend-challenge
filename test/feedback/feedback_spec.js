@@ -5,6 +5,7 @@ const {
   submit,
   getTerms,
   getRequired,
+  sanitizeTerms,
   create,
   ERRORS
 } = require("../../src/feedback/feedback");
@@ -121,13 +122,13 @@ describe("feedback", () => {
       },
       feedbackTermID4: {
         objectId: "feedbackTermID4",
-        slug: "term3",
+        slug: "term4",
         status: "active",
         type: "infrastructure"
       },
       feedbackTermID5: {
         objectId: "feedbackTermID5",
-        slug: "term3",
+        slug: "term5",
         status: "active",
         type: "infrastructure"
       }
@@ -210,15 +211,33 @@ describe("feedback", () => {
       data.Booking.bookingID1.feedback.objectId.should.equal(feedback.objectId);
     });
   });
-  describe('sanitizeTerms', ()=>{
-    // TODO: unit test this method
-    it('should filter invalid terms', async()=>{
-      // TODO: implement me
-    })
-    it('should only allow values between 0 - 5', async()=>{
-      // TODO: implement me
-    })
-  })
+  describe("sanitizeTerms", () => {
+    it("should filter invalid terms", async () => {
+      const data = _.cloneDeep(DATA);
+      const dataStore = new DataStore({ data });
+      const payload = {
+        bookingId: "bookingID1",
+        terms: { term2: 3 }, // Not an active term
+        user: { __type: "Pointer", className: "_User", objectId: "userID" }
+      };
+
+      const validTerms = await sanitizeTerms(dataStore, payload);
+      validTerms.should.be.an.Object().and.empty();
+    });
+
+    it("should only allow values between 0 - 5", async () => {
+      const data = _.cloneDeep(DATA);
+      const dataStore = new DataStore({ data });
+      const payload = {
+        bookingId: "bookingID1",
+        terms: { term1: 80 }, // Must be capped to 5
+        user: { __type: "Pointer", className: "_User", objectId: "userID" }
+      };
+
+      const validTerms = await sanitizeTerms(dataStore, payload);
+      validTerms[Object.keys(validTerms)[0]].should.be.within(0, 5);
+    });
+  });
   describe("create", () => {
     it("should allow a rating of 0", async () => {
       const data = _.cloneDeep(DATA);
@@ -291,7 +310,6 @@ describe("feedback", () => {
         e.code.should.equal(ERRORS.VALUE_REQUIRED.code);
       }
     });
-
 
     it("should fail if the user has already created a feedback for this specific booking", async () => {
       const data = _.cloneDeep(DATA);
